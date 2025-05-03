@@ -24,12 +24,11 @@ public class Player : MonoBehaviour
     public bool interactWithObject()
     {
 		RaycastHit hit;
-
+		Debug.Log(Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, distance, mask));
 		if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, distance, mask))
 		{
 			if (hit.collider.tag == "bounty")
 			{
-				Debug.Log("Se presiono la e ");
 				return hit.collider.transform.GetComponent<AddOn>().activeAddOn();
 			}
 		}
