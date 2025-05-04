@@ -6,7 +6,6 @@ public class AddOn : MonoBehaviour
 {
 	public bool activeAddOn()
 	{
-		Destroy(gameObject);
 		return true;
 	}
 }
