@@ -6,6 +6,7 @@ public class AddOn : MonoBehaviour
 {
 	public bool activeAddOn()
 	{
+		Debug.Log("Paso");
 		return true;
 	}
 }

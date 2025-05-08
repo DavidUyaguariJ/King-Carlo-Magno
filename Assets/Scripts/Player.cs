@@ -10,9 +10,11 @@ public class Player : MonoBehaviour
 	public Texture2D pointer;
 	public GameObject textDetect;
 	GameObject lastRecognized = null;
+    private Vector3 lastCheckpointPosition;
+	private Persistence persistence;
 
 
-	public void makeWalk()
+    public void makeWalk()
     {
         float verticalInput = Input.GetAxis("Vertical");
 		float horizontalInput = Input.GetAxis("Horizontal");
@@ -21,13 +23,29 @@ public class Player : MonoBehaviour
         transform.position = transform.position + movementDirection * speed * Time.deltaTime;
     }
 
-    void Start() 
+    void Start()
     {
         mask = LayerMask.GetMask("Raycast Detect");
-		textDetect.SetActive(false);
-	}
+        textDetect.SetActive(false);
 
-	private void Update()
+        // Inicializar la variable persistence con la instancia del singleton
+        persistence = Persistence.Instance;
+
+        if (persistence != null)
+        {
+            // Cargar la posición del jugador al inicio
+            Vector3 loadedPosition = persistence.LoadPlayerPosition();
+            transform.position = loadedPosition == Vector3.zero ? transform.position : loadedPosition;
+            lastCheckpointPosition = transform.position; // Inicializar con la posición de inicio o cargada
+        }
+        else
+        {
+            Debug.LogError("Persistence.Instance no está inicializado. Asegúrate de que el objeto Persistence esté presente en la escena.");
+        }
+    }
+
+
+    private void Update()
 	{
 		RaycastHit hit;
 		if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, distance, mask))
