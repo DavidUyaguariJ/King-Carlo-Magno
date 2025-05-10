@@ -1,12 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Camera : MonoBehaviour
 {
-    public Transform objetive;
-    public float cameraSpeed = 1f;
-    public Vector3 movement;
+	public Transform objetive;
+	public float cameraSpeed = 1f;
+	public Vector3 movement;
 	private Vector3 initialOffset;
 	private bool hasInitialOffset = false;
 

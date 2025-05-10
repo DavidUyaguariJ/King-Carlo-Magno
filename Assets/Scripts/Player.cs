@@ -1,48 +1,62 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    float speed = 1f;
+	float speed = 1.5f;
 	LayerMask mask;
 	public float distance = 5f;
 	public Texture2D pointer;
 	public GameObject textDetect;
 	GameObject lastRecognized = null;
+	private Persistence persistence;
+	private Camera playerCamera;
 
 
-    public void makeWalk()
-    {
-        float verticalInput = Input.GetAxis("Vertical");
-		float horizontalInput = Input.GetAxis("Horizontal");
-		Vector3 movementDirection = new Vector3(horizontalInput,0, verticalInput);
-        movementDirection.Normalize();
-        transform.position = transform.position + movementDirection * speed * Time.deltaTime;
-    }
-
-    void Start()
-    {
-        mask = LayerMask.GetMask("Raycast Detect");
-        textDetect.SetActive(false);
-    }
 
 
-    private void Update()
+	void Start()
+	{
+		mask = LayerMask.GetMask("Raycast Detect");
+		textDetect.SetActive(false);
+		persistence = FindObjectOfType<Persistence>();
+		playerCamera = FindObjectOfType<Camera>();
+
+		if (persistence != null && playerCamera != null)
+		{
+			persistence.LoadGameState(transform, playerCamera);
+		}
+	}
+
+	void Update()
 	{
 		RaycastHit hit;
 		if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, distance, mask))
 		{
 			DeselectObject();
 			SelectedObject(hit.transform);
+
+			if (Input.GetKeyDown(KeyCode.E) && persistence != null)
+			{
+				persistence.SaveGameState(transform);
+			}
 		}
-		else {
+		else
+		{
 			DeselectObject();
 		}
 	}
 
+	public void makeWalk()
+	{
+		float verticalInput = Input.GetAxis("Vertical");
+		float horizontalInput = Input.GetAxis("Horizontal");
+		Vector3 movementDirection = new Vector3(horizontalInput, 0, verticalInput);
+		movementDirection.Normalize();
+		transform.position = transform.position + movementDirection * speed * Time.deltaTime;
+	}
 	public bool interactWithObject()
-    {
+	{
 		RaycastHit hit;
 		Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, distance, mask);
 		if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, distance, mask))
@@ -52,20 +66,49 @@ public class Player : MonoBehaviour
 				return hit.collider.transform.GetComponent<AddOn>().activeAddOn();
 			}
 		}
-			return false;
+		return false;
 	}
 
-	void SelectedObject(Transform transform) 
+	void SelectedObject(Transform target)
 	{
-		transform.GetComponent<MeshRenderer>().material.color = Color.green;
-		lastRecognized = transform.gameObject;
+		target.GetComponent<MeshRenderer>().material.color = Color.green;
+		lastRecognized = target.gameObject;
+
+		if (textDetect != null)
+		{
+			textDetect.SetActive(true);
+			SetActiveAllChildren(textDetect.transform, true);
+
+			TMPro.TextMeshProUGUI textComponent = textDetect.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+			if (textComponent != null)
+			{
+				textComponent.text = "Mantén presionado E para guardar";
+				textComponent.enabled = true;
+			}
+		}
 	}
-	void DeselectObject() 
+
+	void DeselectObject()
 	{
-		if (lastRecognized) 
-		{ 
+		if (lastRecognized != null)
+		{
 			lastRecognized.GetComponent<Renderer>().material.color = Color.white;
 			lastRecognized = null;
+		}
+
+		if (textDetect != null)
+		{
+			textDetect.SetActive(false);
+		}
+	}
+
+	// Método auxiliar para activar/desactivar todos los hijos recursivamente
+	private void SetActiveAllChildren(Transform parent, bool state)
+	{
+		foreach (Transform child in parent)
+		{
+			child.gameObject.SetActive(state);
+			SetActiveAllChildren(child, state);
 		}
 	}
 
