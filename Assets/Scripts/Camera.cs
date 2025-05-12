@@ -3,26 +3,21 @@ using UnityEngine;
 public class Camera : MonoBehaviour
 {
 	public Transform objetive;
-	public float cameraSpeed = 1f;
-	public Vector3 movement;
-	private Vector3 initialOffset;
-	private bool hasInitialOffset = false;
+	public float cameraSpeed = 1.5f;
 
-	private void Start()
+	public Transform target;
+	private Vector3 offset;
+
+	void Start()
 	{
-		if (objetive != null)
-		{
-			initialOffset = transform.position - objetive.position;
-			hasInitialOffset = true;
-		}
+		offset = transform.position - target.position;
 	}
 
-	private void LateUpdate()
+	void LateUpdate()
 	{
-		if (objetive != null && hasInitialOffset)
+		if (target != null)
 		{
-			Vector3 desiredPosition = objetive.position + initialOffset;
-			transform.position = desiredPosition;
+			transform.position = target.position + offset;
 		}
 	}
 }

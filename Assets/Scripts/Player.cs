@@ -5,16 +5,25 @@ public class Player : MonoBehaviour
 {
 	float speed = 1.5f;
 	LayerMask mask;
-	public float distance = 5f;
+	public float distance = 2f;
 	public Texture2D pointer;
 	public GameObject textDetect;
 	GameObject lastRecognized = null;
 	private Persistence persistence;
 	private Camera playerCamera;
 
+	void Awake()
+	{
+		mask = LayerMask.GetMask("Raycast Detect");
+		textDetect.SetActive(false);
+		persistence = FindObjectOfType<Persistence>();
+		playerCamera = FindObjectOfType<Camera>();
 
-
-
+		if (persistence != null && playerCamera != null)
+		{
+			persistence.LoadGameState(transform, playerCamera);
+		}
+	}
 	void Start()
 	{
 		mask = LayerMask.GetMask("Raycast Detect");
@@ -45,6 +54,8 @@ public class Player : MonoBehaviour
 		{
 			DeselectObject();
 		}
+
+		makeWalk();
 	}
 
 	public void makeWalk()
@@ -55,10 +66,10 @@ public class Player : MonoBehaviour
 		movementDirection.Normalize();
 		transform.position = transform.position + movementDirection * speed * Time.deltaTime;
 	}
+
 	public bool interactWithObject()
 	{
 		RaycastHit hit;
-		Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, distance, mask);
 		if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, distance, mask))
 		{
 			if (hit.collider.tag == "bounty")
@@ -102,7 +113,6 @@ public class Player : MonoBehaviour
 		}
 	}
 
-	// Método auxiliar para activar/desactivar todos los hijos recursivamente
 	private void SetActiveAllChildren(Transform parent, bool state)
 	{
 		foreach (Transform child in parent)
